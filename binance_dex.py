@@ -2,6 +2,7 @@ from binance_chain.http import HttpApiClient
 from binance_chain.wallet import Wallet
 from binance_chain.messages import NewOrderMsg, CancelOrderMsg, OrderType, OrderSide, TimeInForce
 from binance_chain.environment import BinanceEnvironment
+from binance_chain.exceptions import BinanceChainAPIException
 from aiohttp import web
 import json
 
@@ -33,7 +34,13 @@ async def handle_post(request):
             price=data.get('price'),
             quantity=data.get('quantity')
         )
-        resp = client.broadcast_msg(msg, sync=True)
+        try:
+            status = 200
+            resp = client.broadcast_msg(msg, sync=True)
+        except BinanceChainAPIException as e:
+            status = 503
+            resp = {'error': 'pizda',
+                    'message': e.message}
 
     elif action == 'canel_order':
         wallet = Wallet(data.get('private_key'), env=env)
@@ -42,11 +49,17 @@ async def handle_post(request):
             order_id=data.get('order_id'),
             symbol=data.get('symbol'),
         )
-        resp = client.broadcast_msg(msg, sync=True)
+        try:
+            status = 200
+            resp = client.broadcast_msg(msg, sync=True)
+        except BinanceChainAPIException as e:
+            status = 503
+            resp = {'error': 'pizda',
+                    'message': e.message}
 
     if resp:
         body = json.dumps(resp)
-        return web.Response(body=body, status=200)
+        return web.Response(body=body, status=status)
     else:
         return web.Response(body='{"error": "wrong action"}', status=503)
 
