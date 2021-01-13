@@ -65,7 +65,7 @@ async def handle_post(request):
 
 
 async def handle_get(request):
-    return web.Response(body='OK v2', status=200)
+    return web.Response(body='OK  v2', status=200)
 
 
 app = web.Application(client_max_size=(1024**2)*10)
