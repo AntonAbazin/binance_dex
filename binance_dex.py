@@ -20,19 +20,29 @@ async def handle_post(request):
         resp = client.get_time()
 
     elif action == 'new_order':
+
         wallet = Wallet(data.get('private_key'), env=env)
+
         if data.get('side') == 'buy':
             side = OrderSide.BUY
         else:
             side = OrderSide.SELL
+
+        symbol = data.get('symbol')
+        price = data.get('price')
+        quantity = data.get('quantity')
+
+        price = round(price, 5)
+        quantity = round(quantity, 2)
+
         msg = NewOrderMsg(
             wallet=wallet,
-            symbol=data.get('symbol'),
+            symbol=symbol,
             time_in_force=TimeInForce.GOOD_TILL_EXPIRE,
             order_type=OrderType.LIMIT,
             side=side,
-            price=data.get('price'),
-            quantity=data.get('quantity')
+            price=price,
+            quantity=quantity
         )
         try:
             status = 200
@@ -65,7 +75,7 @@ async def handle_post(request):
 
 
 async def handle_get(request):
-    return web.Response(body='OK  v2', status=200)
+    return web.Response(body='OK  v3', status=200)
 
 
 app = web.Application(client_max_size=(1024**2)*10)
